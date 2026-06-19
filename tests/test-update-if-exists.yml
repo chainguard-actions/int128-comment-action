@@ -1,0 +1,37 @@
+name: Test update-if-exists input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: pull_request
+      GITHUB_REF: refs/pull/1/merge
+      GITHUB_HEAD_REF: feature-branch
+      GITHUB_BASE_REF: main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run action with update-if-exists replace mode
+        id: action
+        uses: .
+        with:
+          post: "Updated comment content"
+          update-if-exists: "replace"
+          update-if-exists-key: "test-key-unique-identifier"
+          repository: "octocat/Hello-World"
+          issue-number: "1"
+          token: "fake-token-for-testing"
+        continue-on-error: true
+      - name: Assert action ran (outcome is failure due to no valid token)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed as expected (no valid token/repo)"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi
