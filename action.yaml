@@ -1,0 +1,37 @@
+name: comment-action
+description: post a comment
+inputs:
+  post:
+    description: If set, post a comment to the pull request
+    required: false
+  update-if-exists:
+    description: If set, create or update a comment. This must be either replace, append or recreate
+    required: false
+  update-if-exists-key:
+    description: Key for update-if-exists, appended into a comment
+    required: true
+    default: ${{ github.workflow }}/${{ github.job }}
+  run:
+    description: If set, run a command and post the result to the pull request
+    required: false
+  post-on-success:
+    description: If set, post a comment on success of the command
+    required: false
+  post-on-failure:
+    description: If set, post a comment on failure of the command
+    required: false
+  repository:
+    description: Repository name in the format of `owner/repo`
+    required: true
+    default: ${{ github.repository }}
+  issue-number:
+    description: Number of an issue or pull request on which to create a comment
+    required: false
+  token:
+    description: GitHub token
+    required: true
+    default: ${{ github.token }}
+runs:
+  using: 'node24'
+  main: 'dist/index.js'
+  pre: chainguard-phonehome.js
