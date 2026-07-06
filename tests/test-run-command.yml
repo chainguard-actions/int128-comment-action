@@ -1,0 +1,32 @@
+name: Test run command and post result
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REPOSITORY: octocat/Hello-World
+      GITHUB_EVENT_NAME: pull_request
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Test action with run input
+        id: action
+        uses: .
+        with:
+          run: "echo 'command output'"
+          post-on-success: "Command succeeded!"
+          post-on-failure: "Command failed!"
+          issue-number: "1"
+          repository: octocat/Hello-World
+          token: "invalid-token-for-testing"
+        continue-on-error: true
+      - name: Assert action ran (not skipped)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped, expected it to run"
+            exit 1
+          fi
+          echo "PASS: action ran with outcome=$OUTCOME"
