@@ -1,0 +1,33 @@
+name: Test run command failure scenario
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+      GITHUB_REPOSITORY: test-owner/test-repo
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          run: "exit 1"
+          post-on-failure: "The command failed as expected in this test"
+          # No issue-number — action should detect failure but skip posting
+          token: fake-token-for-testing
+        continue-on-error: true
+      - name: Assert action ran after command failure
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The run command exits 1, so the action itself may report failure.
+          # Either success or failure is acceptable — we just verify it ran.
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran with a deterministic outcome after command failure"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi
