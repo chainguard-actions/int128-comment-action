@@ -1,0 +1,28 @@
+name: Test post-on-success with successful command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with post-on-success set and a successful command
+        id: action
+        uses: .
+        with:
+          run: "echo hello"
+          post-on-success: "Command succeeded!"
+        # Command succeeds and post-on-success is set, but under workflow_dispatch
+        # there are no associated PRs, so no API calls are made and the action succeeds.
+
+      - name: Assert action completed successfully
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed when run command exits 0 with post-on-success set, got outcome=$OUTCOME"
+            exit 1
+          fi
+          echo "PASS: action correctly succeeded with post-on-success and no associated PRs"

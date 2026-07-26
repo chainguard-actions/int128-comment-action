@@ -1,0 +1,29 @@
+name: Test issue-number input with run command and no posting
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with issue-number set but no post-on-success or post-on-failure
+        id: action
+        uses: .
+        with:
+          run: "echo hello"
+          issue-number: "1"
+        # issue-number is set but neither post-on-success nor post-on-failure is set.
+        # The command succeeds and nothing is posted, so no API calls are made.
+        # The action should complete successfully.
+
+      - name: Assert action completed successfully
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed when run command exits 0 with issue-number set but no post-on-success, got outcome=$OUTCOME"
+            exit 1
+          fi
+          echo "PASS: action correctly succeeded with issue-number set and no posting configured"
