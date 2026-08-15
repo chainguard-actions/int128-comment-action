@@ -1,21 +1,173 @@
-# int128/comment-action
+# comment-action [![ts](https://github.com/int128/comment-action/actions/workflows/ts.yaml/badge.svg)](https://github.com/int128/comment-action/actions/workflows/ts.yaml)
 
-post a comment
+This is an action to post a comment to the current pull request.
+It is inspired from [suzuki-shunsuke/github-comment](https://github.com/suzuki-shunsuke/github-comment).
 
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/int128/comment-action](https://github.com/int128/comment-action).
+## Getting Started
 
-## Versions
+This action infers pull request(s) from the context as follows:
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v1.63.0 | [`v1.63.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.63.0) | [`3691411`](https://github.com/int128/comment-action/commit/36914110eb9d2010cc18858459e9ad3e5694d9e8) |
-| v1.64.0 | [`v1.64.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.64.0) | [`49b52ff`](https://github.com/int128/comment-action/commit/49b52ff9a6f69b0cec7cfcc63f57c771bc0d64f4) |
-| v1.65.0 | [`v1.65.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.65.0) | [`f1b8793`](https://github.com/int128/comment-action/commit/f1b8793eb5b418838c59535a043d8996bd7b5625) |
-| v1.66.0 | [`v1.66.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.66.0) | [`6178a03`](https://github.com/int128/comment-action/commit/6178a0317dc0dc698ddbed82176419f7b3effd3d) |
-| v1.67.0 | [`v1.67.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.67.0) | [`8a8f706`](https://github.com/int128/comment-action/commit/8a8f706e54cee412df11b9d08f1decd8a69aba07) |
-| v1.69.0 | [`v1.69.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.69.0) | [`2263c1a`](https://github.com/int128/comment-action/commit/2263c1a82c13c37672f725bcd07145530cd42579) |
-| v1.70.0 | [`v1.70.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.70.0) | [`906b4f9`](https://github.com/int128/comment-action/commit/906b4f9a5be7c3c18eb0c30046d3e8b72b8558e3) |
-| v1.71.0 | [`v1.71.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.71.0) | [`aa0f226`](https://github.com/int128/comment-action/commit/aa0f226bd3c7291f61ec8df4a33d3e51de0504e8) |
+- On `pull_request` event, use the current pull request
+- On `issue` event, use the current issue
+- On `push` event, use pull request(s) associated with the current commit
+- Otherwise, get pull request(s) associated with `github.sha`
+
+You can also specify the issue or pull request number via `issue-number` input.
+
+### Post a comment
+
+To post a comment:
+
+```yaml
+jobs:
+  build:
+    steps:
+      - uses: int128/comment-action@v1
+        with:
+          post: |
+            :wave: Hello World
+```
+
+### Update the comment if exists
+
+You can create an issue or update the issue if exists.
+It is useful to avoid too many comments in an issue.
+
+<img width="920" alt="image" src="https://user-images.githubusercontent.com/321266/193756823-d9b668be-afa2-46eb-b9d7-d5d38da46a03.png">
+
+To replace the comment if it exists,
+
+```yaml
+jobs:
+  build:
+    steps:
+      - uses: int128/comment-action@v1
+        with:
+          update-if-exists: replace
+          post: |
+            :while_check_mark: The resource has been created
+```
+
+To append the comment if it exists,
+
+```yaml
+jobs:
+  build:
+    steps:
+      - uses: int128/comment-action@v1
+        with:
+          update-if-exists: append
+          post: |
+            :warning: Creating resource
+```
+
+To recreate the comment if it exists,
+
+```yaml
+jobs:
+  build:
+    steps:
+      - uses: int128/comment-action@v1
+        with:
+          update-if-exists: recreate
+          post: |
+            :warning: Creating resource
+```
+
+This action finds the latest comment created by same workflow and job, by default.
+It embeds the key into an issue comment as a markdown comment `<!-- -->`.
+
+If you need to identify a comment to update, set the key as follows:
+
+```yaml
+jobs:
+  build:
+    steps:
+      - uses: int128/comment-action@v1
+        with:
+          update-if-exists: append
+          update-if-exists-key: ${{ github.workflow }}/${{ github.job }}/terraform-plan
+          post: |
+            :warning: Creating resource
+```
+
+### Run a command
+
+To run a command and post the output on failure:
+
+````yaml
+jobs:
+  build:
+    steps:
+      - uses: int128/comment-action@v1
+        with:
+          run: yarn test
+          post-on-failure: |
+            ## :x: Test failure
+            ```
+            ${run.output}
+            ```
+````
+
+You can use the string interpolation in `post-on-success` and `post-on-failure`.
+The following variables are available:
+
+- `${run.output}`
+  - combined output of the command
+- `${run.code}`
+  - exit code of the command
+
+This action does not support any script to keep it simple and secure.
+You can still write a script by `actions/github-script`,
+but it would be nice to write your awesome action by a programming language for maintainability.
+
+### Specify an issue number or repository
+
+To post a comment to a specific issue or pull request,
+
+```yaml
+jobs:
+  build:
+    steps:
+      - uses: int128/comment-action@v1
+        with:
+          issue-number: 12345
+          post: |
+            :wave: Hello World
+```
+
+To post a comment to a specific issue or pull request in a specific repository,
+
+```yaml
+jobs:
+  build:
+    steps:
+      - uses: int128/comment-action@v1
+        with:
+          repository: owner/repo
+          issue-number: 12345
+          token: # PAT or GitHub App token is needed for another repository
+          post: |
+            :wave: Hello World
+```
+
+## Specification
+
+### Inputs
+
+| Name                   | Default                                    | Description                                                                               |
+| ---------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `post`                 | -                                          | If set, post a comment to the pull request                                                |
+| `update-if-exists`     | (optional)                                 | If set, create or update a comment. This must be either `replace`, `append` or `recreate` |
+| `update-if-exists-key` | `${{ github.workflow }}/${{ github.job }}` | Key for `update-if-exists`                                                                |
+| `run`                  | -                                          | If set, run a command                                                                     |
+| `post-on-success`      | (optional)                                 | If set, post a comment on success of the command                                          |
+| `post-on-failure`      | (optional)                                 | If set, post a comment on failure of the command                                          |
+| `repository`           | `${{ github.repository }}`                 | Repository name in the format of `owner/repo`                                             |
+| `issue-number`         | (optional)                                 | Number of an issue or pull request on which to create a comment                           |
+| `token`                | `github.token`                             | GitHub token                                                                              |
+
+Either `post` or `run` must be set.
 
 ## Privacy
 
