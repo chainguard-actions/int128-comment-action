@@ -1,0 +1,19 @@
+name: Test run command success without post-on-success
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run action with a successful command and no post-on-success
+        id: action
+        uses: .
+        with:
+          run: echo "hello world"
+          # No post-on-success means no comment is posted, no API call needed
+          # No issue-number needed since no comment will be posted
+      - name: Assert action succeeded
+        run: |
+          echo "Action completed successfully (no comment posted on success without post-on-success)"
+          echo "PASS"
