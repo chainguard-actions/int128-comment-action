@@ -20,6 +20,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v1.73.0 | [`v1.73.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.73.0) | [`012d07c`](https://github.com/int128/comment-action/commit/012d07c1feb8a1e85933b77c7f72a73d82026805) |
 | v1.74.0 | [`v1.74.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.74.0) | [`81d8878`](https://github.com/int128/comment-action/commit/81d88788677cae1d348427982397e0f8dc3e8a31) |
 | v1.75.0 | [`v1.75.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.75.0) | [`a4a97c4`](https://github.com/int128/comment-action/commit/a4a97c4abd5181a63e45088025ed172742580bef) |
+| v1.76.0 | [`v1.76.0`](https://github.com/chainguard-actions/int128-comment-action/tree/v1.76.0) | [`1dff349`](https://github.com/int128/comment-action/commit/1dff3490b05462df33a39767ef907fc93f99a833) |
 
 ## Privacy
 
